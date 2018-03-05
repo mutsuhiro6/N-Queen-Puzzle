@@ -1,5 +1,5 @@
-# N-Queen-Puzzle
+# N-Queen Puzzle
 
-The program does not work yet.
+This program solves N Queens Puzzle by best first search(BFS).
 
-Solve N-Queen puzzle by A* search.
+## heuristic
