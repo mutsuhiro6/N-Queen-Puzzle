@@ -4,68 +4,71 @@ import heapq
 import random
 
 # N Queen Pazzle
-N = 4
 
-def heuristic(position, q_position):
-    if position == None:
+
+def heuristic(N, put_pos, position):
+    if not position:
         return 0
-    if len(q_position) < 2:
-        return 0
-    posx = position % N
-    posy = position // N
-    pos = [posx, posy]
-    x = (posx + 1) % N
-    y = (posy + 1) // N
-    xy = [x, y]
-    cnt = 0
-    q_pos_lst = [] # capturable candidates on oblique line
-    for q in q_position:
-        qx = q % N
-        qy = q // N
-        if posx == qx or posy == qy:
-            cnt += 1 # count queen captured vartical or horizonal line
-        else:
-            q_pos_lst.append([qx, qy])   
-    while not pos == xy:
-        if xy in q_pos_lst :
-            cnt += 1
-        x = (x + 1) % N
-        y = (y + 1) // N
-        xy = [x, y]
-    x = (posx + 1) % N
-    y = (posy + 1) // N
-    xy = [x, y]
-    while not pos == xy:
-        if xy in q_pos_lst :
-            cnt += 1
-        x = (x - 1) % N if x - 1 >= 0 else N - 1
-        y = (y - 1) // N if y - 1 >= 0 else N - 1
-        xy = [x, y]
-    return cnt
+    for i in position:
+        x = put_pos  % N
+        y = put_pos // N
+        ix = i  % N
+        iy = i // N
+        if ix == x or iy == y:
+            return 1
+        elif ix > x and iy > y:
+            while x <= N and y <= N:
+                if ix == x and iy == y:
+                    return 1
+                x += 1
+                y += 1
+        elif ix < x and iy < y:
+            while x >= 0 and y >= 0:
+                if ix == x and iy == y:
+                    return 1
+                x -= 1
+                y -= 1
+        elif ix > x and iy < y:
+            while x <= N and y >= 0:
+                if ix == x and iy == y:
+                    return 1
+                x += 1
+                y -= 1
+        elif ix < x and iy > y:
+            while x >= 0 and y <= N:
+                if ix == x and iy == y:
+                    return 1
+                x -= 1
+                y += 1
+    return 0
 
 class node:
-    def __init__(self, position, q_position, depth):
+    def __init__(self, N, position, q_position, depth, prev_heu):
         self.depth = depth            
         self.q_position = copy.deepcopy(q_position)
         self.cost = 0
         if position != None:
             self.position = position
             self.depth = depth
-            self.cost = depth + heuristic(self.position, self.q_position)
-            self.q_position.append(self.position)       
+            self.heu = heuristic(N, self.position, self.q_position) + prev_heu
+            self.cost = depth + self.heu
+            self.q_position.append(self.position)
+            self.q_position.sort()
+        else:
+            self.heu = 0     
     def __eq__(self, other):
         if self is other:
             return True
         elif type(self) == type(other):
             return False
         else:
-            return self.cost == other.cost
+            return self.heu == other.heu
     def __lt__(self, other):
-        return self.cost < other.cost
+        return self.heu < other.heu
 
 
-def printState(q_position):
-    for i in range(N*N):
+def printState(N, q_position):
+    for i in range(N * N):
         if i in q_position:
             if i % N == N-1:
                 print('Q')
@@ -79,30 +82,42 @@ def printState(q_position):
     print('')
         
 
-def aStar():
+def aStar(N):
     open = []
+    ans = []
     close = {}
     q_position = []
-    open.append(node(None, q_position, 0))
+    open.append(node(N, None, q_position, 0, 0))
     close[tuple(q_position)] = True
     extracted = 0
     while True:
+        sys.stdout.write("\033[2K\033[G%d" % extracted)
+        sys.stdout.flush()
         if not open:
-            print('Search failed.')
-            return (999, 0, 0)
+            #print('Search finished.')
+            return ans
         n = heapq.heappop(open)
-        printState(n.q_position)
-        if len(n.q_position) == N:
-            print("Search successed.")
-            return (n.depth, extracted, float(format(extracted ** (1 / n.depth), '.3f'))) if n.depth else (0, 0, 0)
+        #printState(N, n.q_position)
+        if len(n.q_position) == N and n.heu == 0:
+            ans.append(n)
+            #print("Search successed.")
+        elif len(n.q_position) >= N:
+            pass
+        elif n.heu > 0:
+            pass
         else:
-            for position in range(N*N):
+            for position in range(N * N):
                 if not (position in n.q_position):
-                    child = node(position, n.q_position, n.depth + 1)
+                    child = node(N, position, n.q_position, n.depth + 1, n.heu)
                     key = tuple(child.q_position)
-                    if not key in close:
+                    if (not key in close) and n.heu == 0:
                         heapq.heappush(open, child)
                         close[key] = True                
                         extracted += 1        
-
-aStar()
+N = int(input('> input N : '))
+i = 1
+for ans in aStar(N):
+    print('ans' + str(i))
+    #print(ans.q_position)
+    printState(N, ans.q_position)
+    i += 1
