@@ -84,22 +84,22 @@ def printState(N, q_position):
 
 def aStar(N):
     open = []
-    ans = []
+    ans = 0
     close = {}
     q_position = []
     open.append(node(N, None, q_position, 0, 0))
     close[tuple(q_position)] = True
-    extracted = 0
+    #extracted = 0
     while True:
-        sys.stdout.write("\033[2K\033[G%d" % extracted)
-        sys.stdout.flush()
+        #sys.stdout.write("\033[2K\033[G%d" % extracted)
+        #sys.stdout.flush()
         if not open:
-            #print('Search finished.')
+            print('Search finished.')
             return ans
         n = heapq.heappop(open)
         #printState(N, n.q_position)
         if len(n.q_position) == N and n.heu == 0:
-            ans.append(n)
+            ans += 1
             #print("Search successed.")
         elif len(n.q_position) >= N:
             pass
@@ -113,11 +113,6 @@ def aStar(N):
                     if (not key in close) and n.heu == 0:
                         heapq.heappush(open, child)
                         close[key] = True                
-                        extracted += 1        
+                        #extracted += 1        
 N = int(input('> input N : '))
-i = 1
-for ans in aStar(N):
-    print('ans' + str(i))
-    #print(ans.q_position)
-    printState(N, ans.q_position)
-    i += 1
+print('\nValuation Solutions : ' + str(aStar(N)))
