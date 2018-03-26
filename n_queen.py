@@ -91,8 +91,8 @@ def aStar(N):
     close[tuple(q_position)] = True
     #extracted = 0
     while True:
-        #sys.stdout.write("\033[2K\033[G%d" % extracted)
-        #sys.stdout.flush()
+        sys.stdout.write("\033[2K\033[G%d" % ans)
+        sys.stdout.flush()
         if not open:
             print('Search finished.')
             return ans
@@ -110,7 +110,7 @@ def aStar(N):
                 if not (position in n.q_position):
                     child = node(N, position, n.q_position, n.depth + 1, n.heu)
                     key = tuple(child.q_position)
-                    if (not key in close) and n.heu == 0:
+                    if not key in close and n.heu == 0:
                         heapq.heappush(open, child)
                         close[key] = True                
                         #extracted += 1        
